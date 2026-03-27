@@ -15,24 +15,49 @@ import java.util.Optional;
 public interface PriceEntryRepository extends JpaRepository<PriceEntry, Long> {
 
     // Latest verified price for a commodity in a market
+    @Query("""
+        SELECT pe FROM PriceEntry pe
+        JOIN FETCH pe.commodity
+        JOIN FETCH pe.market
+        JOIN FETCH pe.agent
+        WHERE pe.commodity.id = :commodityId
+          AND pe.market.id = :marketId
+          AND pe.verificationStatus = :status
+        ORDER BY pe.recordedAt DESC
+        LIMIT 1
+        """)
     Optional<PriceEntry> findTopByCommodityIdAndMarketIdAndVerificationStatusOrderByRecordedAtDesc(
-        Long commodityId,
-        Long marketId,
-        VerificationStatus status
+        @Param("commodityId") Long commodityId,
+        @Param("marketId") Long marketId,
+        @Param("status") VerificationStatus status
     );
 
     // Verified price history for a commodity in a market within a date range
+    @Query("""
+        SELECT pe FROM PriceEntry pe
+        JOIN FETCH pe.commodity
+        JOIN FETCH pe.market
+        JOIN FETCH pe.agent
+        WHERE pe.commodity.id = :commodityId
+          AND pe.market.id = :marketId
+          AND pe.verificationStatus = :status
+          AND pe.recordedAt BETWEEN :from AND :to
+        ORDER BY pe.recordedAt ASC
+        """)
     List<PriceEntry> findAllByCommodityIdAndMarketIdAndVerificationStatusAndRecordedAtBetweenOrderByRecordedAtAsc(
-        Long commodityId,
-        Long marketId,
-        VerificationStatus status,
-        LocalDateTime from,
-        LocalDateTime to
+        @Param("commodityId") Long commodityId,
+        @Param("marketId") Long marketId,
+        @Param("status") VerificationStatus status,
+        @Param("from") LocalDateTime from,
+        @Param("to") LocalDateTime to
     );
 
     // Latest verified price per market for a commodity in a city
     @Query("""
         SELECT pe FROM PriceEntry pe
+        JOIN FETCH pe.commodity
+        JOIN FETCH pe.market
+        JOIN FETCH pe.agent
         WHERE pe.commodity.id = :commodityId
           AND LOWER(pe.market.city) = LOWER(:city)
           AND pe.verificationStatus = :status

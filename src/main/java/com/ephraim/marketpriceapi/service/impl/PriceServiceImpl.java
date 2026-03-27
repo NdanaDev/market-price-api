@@ -70,6 +70,7 @@ public class PriceServiceImpl implements PriceService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     @Cacheable(cacheNames = CacheNames.LATEST_PRICE,
                key = "'commodity_' + #commodityId + ':market_' + #marketId")
     public LatestPriceResponse getLatest(Long commodityId, Long marketId) {
@@ -83,6 +84,7 @@ public class PriceServiceImpl implements PriceService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PriceHistoryResponse> getHistory(Long commodityId, Long marketId, int days) {
         LocalDateTime from = LocalDateTime.now().minusDays(days);
         LocalDateTime to = LocalDateTime.now();
@@ -95,6 +97,7 @@ public class PriceServiceImpl implements PriceService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     @Cacheable(cacheNames = CacheNames.COMPARE_PRICES,
                key = "'commodity_' + #commodityId + ':city_' + #city")
     public List<ComparePriceResponse> compareAcrossCity(Long commodityId, String city) {

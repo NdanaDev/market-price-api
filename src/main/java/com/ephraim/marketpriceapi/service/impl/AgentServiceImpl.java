@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class AgentServiceImpl implements AgentService {
@@ -23,6 +25,15 @@ public class AgentServiceImpl implements AgentService {
     public AgentResponse create(CreateAgentRequest request) {
         Agent saved = agentRepository.save(agentMapper.toEntity(request));
         return agentMapper.toResponse(saved);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AgentResponse> getActiveAgents() {
+        return agentRepository.findAllByIsActiveTrueOrderByFullNameAsc()
+                .stream()
+                .map(agentMapper::toResponse)
+                .toList();
     }
 
     @Override
